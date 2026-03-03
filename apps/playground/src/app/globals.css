@@ -1,0 +1,235 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --foreground-rgb: 0, 0, 0;
+  --background-start-rgb: 214, 219, 220;
+  --background-end-rgb: 255, 255, 255;
+}
+
+body {
+  color: rgb(var(--foreground-rgb));
+  background: rgb(var(--background-end-rgb));
+}
+
+/*
+ * Fix: Tailwind Typography (prose) overrides inline color on <strong> elements
+ * via `.prose :where(strong) { color: var(--tw-prose-bold); }`.
+ * Force all inline formatting marks inside the ProseMirror editor to
+ * inherit color from the nearest parent (e.g. a TextStyle span) so that
+ * Bold + Color combinations display the correct selected color.
+ */
+.ProseMirror strong,
+.ProseMirror em,
+.ProseMirror u,
+.ProseMirror s,
+.ProseMirror code,
+.ProseMirror mark {
+  color: inherit;
+}
+
+/*
+ * Hierarchical numbered lists: 1 → 1.1 → 1.1.1
+ *
+ * CSS counters() (plural) automatically concatenates all ancestor counter
+ * values with the given separator, giving us the hierarchical numbering
+ * without any JavaScript.
+ *
+ * Layout note: Tiptap wraps list item text inside <p> (a block element),
+ * so a plain ::before would land on its own line. We use display:flex on
+ * the <li> to keep the counter and the content in the same row, and
+ * flex-basis:100% to push nested <ol>/<ul> onto a fresh row below.
+ */
+.ProseMirror ol {
+  list-style: none;
+  counter-reset: qik-ol;
+  padding-left: 0;
+}
+
+.ProseMirror ol > li {
+  counter-increment: qik-ol;
+  display: flex;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  gap: 0;
+}
+
+.ProseMirror ol > li::before {
+  content: counters(qik-ol, ".") ".";
+  white-space: nowrap;
+  flex-shrink: 0;
+  font-variant-numeric: tabular-nums;
+  margin-right: 0.4rem;
+}
+
+/* Paragraph content stretches to fill remaining row space, no margin */
+.ProseMirror ol > li > p,
+.ProseMirror ul > li > p {
+  flex: 1;
+  min-width: 0;
+  margin: 0 !important;
+  padding: 0 !important;
+  line-height: 1.5;
+}
+
+/* Nested lists break onto a new row below the text */
+.ProseMirror ol > li > ol,
+.ProseMirror ol > li > ul {
+  flex-basis: 100%;
+  padding-left: 1.5rem;
+}
+
+/* ── Blockquote ────────────────────────────────────────────── */
+.ProseMirror blockquote {
+  border-left: 4px solid #3b82f6 !important; /* blue-500 accent */
+  margin: 1rem 0 !important;
+  padding: 0.5rem 0 0.5rem 1rem !important;
+  color: #6b7280 !important; /* gray-500 */
+  font-style: italic !important;
+  background: #f0f7ff !important; /* very light blue tint */
+  border-radius: 0 4px 4px 0 !important;
+}
+
+.ProseMirror blockquote p {
+  margin: 0 !important;
+}
+
+/*
+ * Table styles
+ *
+ * NOTE: overflow: hidden must NOT be on the table itself when resizable: true
+ * — it clips borders. It belongs on .tableWrapper instead.
+ */
+.ProseMirror .tableWrapper {
+  overflow-x: auto;
+  margin: 0.75rem 0;
+}
+
+.ProseMirror .tableWrapper table {
+  border-collapse: collapse !important;
+  width: 100%;
+  table-layout: fixed;
+  box-sizing: border-box;
+}
+
+.ProseMirror .tableWrapper table td,
+.ProseMirror .tableWrapper table th {
+  border: 1px solid #d1d5db !important;
+  padding: 0.5rem 0.75rem;
+  vertical-align: top;
+  min-width: 80px;
+  position: relative;
+  box-sizing: border-box;
+}
+
+.ProseMirror .tableWrapper table th {
+  background-color: #f9fafb;
+  font-weight: 600;
+  text-align: left;
+}
+
+/* Selected cell highlight */
+.ProseMirror .tableWrapper table .selectedCell:after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: rgba(59, 130, 246, 0.15);
+  pointer-events: none;
+}
+
+/* Column resize handle injected by Tiptap when resizable: true */
+.ProseMirror .column-resize-handle {
+  position: absolute;
+  right: -2px;
+  top: 0;
+  bottom: 0;
+  width: 4px;
+  background-color: #3b82f6;
+  cursor: col-resize;
+  pointer-events: auto;
+  z-index: 10;
+}
+
+.ProseMirror.resize-cursor {
+  cursor: col-resize;
+}
+
+/* ── Code Block ────────────────────────────────────────────── */
+.ProseMirror pre.qik-code-block {
+  background: #1e1e2e !important; /* dark bg */
+  color: #cdd6f4 !important; /* light text */
+  border-radius: 8px !important;
+  padding: 1rem 1.25rem !important;
+  margin: 1rem 0 !important;
+  overflow-x: auto !important;
+  font-family:
+    "JetBrains Mono", "Fira Code", "Cascadia Code", Consolas, monospace !important;
+  font-size: 0.875rem !important;
+  line-height: 1.6 !important;
+  border: 1px solid #313244 !important;
+}
+
+.ProseMirror pre.qik-code-block code {
+  background: none !important;
+  padding: 0 !important;
+  color: inherit !important;
+  font-size: inherit !important;
+  font-family: inherit !important;
+}
+
+/* ── lowlight / highlight.js token colors (Catppuccin-inspired) ── */
+.ProseMirror pre.qik-code-block .hljs-comment,
+.ProseMirror pre.qik-code-block .hljs-meta {
+  color: #6c7086;
+}
+.ProseMirror pre.qik-code-block .hljs-keyword,
+.ProseMirror pre.qik-code-block .hljs-selector-tag,
+.ProseMirror pre.qik-code-block .hljs-literal {
+  color: #cba6f7;
+} /* purple */
+.ProseMirror pre.qik-code-block .hljs-string,
+.ProseMirror pre.qik-code-block .hljs-template-string,
+.ProseMirror pre.qik-code-block .hljs-attr {
+  color: #a6e3a1;
+} /* green */
+.ProseMirror pre.qik-code-block .hljs-number,
+.ProseMirror pre.qik-code-block .hljs-built_in {
+  color: #fab387;
+} /* orange */
+.ProseMirror pre.qik-code-block .hljs-function,
+.ProseMirror pre.qik-code-block .hljs-title {
+  color: #89b4fa;
+} /* blue */
+.ProseMirror pre.qik-code-block .hljs-type,
+.ProseMirror pre.qik-code-block .hljs-class {
+  color: #f9e2af;
+} /* yellow */
+.ProseMirror pre.qik-code-block .hljs-variable,
+.ProseMirror pre.qik-code-block .hljs-params {
+  color: #f38ba8;
+} /* red */
+.ProseMirror pre.qik-code-block .hljs-tag {
+  color: #89dceb;
+} /* teal */
+.ProseMirror pre.qik-code-block .hljs-selector-class {
+  color: #f9e2af;
+}
+
+/* ── Video Embed ────────────────────────────────────────────── */
+.ProseMirror .qik-video-embed {
+  position: relative;
+  margin: 1rem 0;
+  border-radius: 8px;
+  overflow: hidden;
+  background: #000;
+  aspect-ratio: 16 / 9;
+}
+
+.ProseMirror .qik-video-embed iframe {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border: none;
+}
