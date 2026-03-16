@@ -3,6 +3,7 @@ import type { Editor } from "@tiptap/react";
 import { Video } from "lucide-react";
 import * as Popover from "@radix-ui/react-popover";
 import { resolveEmbedUrl } from "@qik-editor/core";
+import { ActionTooltip } from "../tooltip";
 
 export interface VideoButtonProps {
   editor: Editor | null;
@@ -39,16 +40,17 @@ export function VideoButton({ editor }: VideoButtonProps) {
         }
       }}
     >
-      <Popover.Trigger asChild>
-        <button
-          type="button"
-          className="rounded-md p-2 transition-colors text-gray-700 hover:bg-gray-200"
-          aria-label="Embed video"
-          title="Embed video"
-        >
-          <Video className="h-4 w-4" />
-        </button>
-      </Popover.Trigger>
+      <ActionTooltip title="Embed video">
+        <Popover.Trigger asChild>
+          <button
+            type="button"
+            className="rounded-md p-2 transition-colors text-gray-700 hover:bg-gray-200"
+            aria-label="Embed video"
+          >
+            <Video className="h-4 w-4" />
+          </button>
+        </Popover.Trigger>
+      </ActionTooltip>
 
       <Popover.Portal>
         <Popover.Content

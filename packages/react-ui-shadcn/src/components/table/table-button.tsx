@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import type { Editor } from "@tiptap/react";
 import * as Popover from "@radix-ui/react-popover";
 import { Table2 } from "lucide-react";
+import { ActionTooltip } from "../tooltip";
 
 const MAX_ROWS = 8;
 const MAX_COLS = 10;
@@ -28,16 +29,17 @@ export function TableButton({ editor }: TableButtonProps) {
 
   return (
     <Popover.Root open={open} onOpenChange={setOpen}>
-      <Popover.Trigger asChild>
-        <button
-          type="button"
-          className={`rounded-md p-2 hover:bg-gray-200 transition-colors text-gray-700`}
-          aria-label="Insert table"
-          title="Insert table"
-        >
-          <Table2 className="h-4 w-4" />
-        </button>
-      </Popover.Trigger>
+      <ActionTooltip title="Insert table">
+        <Popover.Trigger asChild>
+          <button
+            type="button"
+            className={`rounded-md p-2 hover:bg-gray-200 transition-colors text-gray-700`}
+            aria-label="Insert table"
+          >
+            <Table2 className="h-4 w-4" />
+          </button>
+        </Popover.Trigger>
+      </ActionTooltip>
 
       <Popover.Portal>
         <Popover.Content

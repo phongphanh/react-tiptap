@@ -17,6 +17,7 @@ import { TableButton } from "./table/table-button";
 import { BlockquoteButton } from "./blockquote-button";
 import { CodeBlockButton } from "./code-block-button";
 import { VideoButton } from "./video/video-button";
+import { ActionTooltip } from "./tooltip";
 
 export interface ToolbarProps {
   editor: Editor | null;
@@ -66,30 +67,32 @@ export function Toolbar({ editor, className, onUpload }: ToolbarProps) {
       <IndentButtons editor={editor} />
       <div className="w-px h-6 bg-gray-200 mx-1" />
       <div className="flex items-center gap-1">
-        <button
-          onClick={() => editor.chain().focus().toggleBold().run()}
-          className={`rounded-md p-2 text-gray-700 hover:bg-gray-200 transition-colors ${
-            activeFormats.bold ? "bg-gray-200" : ""
-          }`}
-          aria-label="Bold"
-          title="Bold"
-        >
-          <strong className="font-bold font-serif w-4 h-4 flex items-center justify-center">
-            B
-          </strong>
-        </button>
-        <button
-          onClick={() => editor.chain().focus().toggleItalic().run()}
-          className={`rounded-md p-2 text-gray-700 hover:bg-gray-200 transition-colors ${
-            activeFormats.italic ? "bg-gray-200" : ""
-          }`}
-          aria-label="Italic"
-          title="Italic"
-        >
-          <em className="font-serif italic w-4 h-4 flex items-center justify-center">
-            I
-          </em>
-        </button>
+        <ActionTooltip title="Bold">
+          <button
+            onClick={() => editor.chain().focus().toggleBold().run()}
+            className={`rounded-md p-2 text-gray-700 hover:bg-gray-200 transition-colors ${
+              activeFormats.bold ? "bg-gray-200" : ""
+            }`}
+            aria-label="Bold"
+          >
+            <strong className="font-bold font-serif w-4 h-4 flex items-center justify-center">
+              B
+            </strong>
+          </button>
+        </ActionTooltip>
+        <ActionTooltip title="Italic">
+          <button
+            onClick={() => editor.chain().focus().toggleItalic().run()}
+            className={`rounded-md p-2 text-gray-700 hover:bg-gray-200 transition-colors ${
+              activeFormats.italic ? "bg-gray-200" : ""
+            }`}
+            aria-label="Italic"
+          >
+            <em className="font-serif italic w-4 h-4 flex items-center justify-center">
+              I
+            </em>
+          </button>
+        </ActionTooltip>
         <TextFormatButtons editor={editor} />
       </div>
       <div className="w-px h-6 bg-gray-200 mx-1" />

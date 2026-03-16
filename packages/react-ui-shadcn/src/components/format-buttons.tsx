@@ -10,6 +10,7 @@ import "@tiptap/extension-underline";
 import "@tiptap/extension-strike";
 import "@tiptap/extension-subscript";
 import "@tiptap/extension-superscript";
+import { ActionTooltip } from "./tooltip";
 
 export interface TextFormatButtonsProps {
   editor: Editor | null;
@@ -53,53 +54,57 @@ export function TextFormatButtons({ editor }: TextFormatButtonsProps) {
 
   return (
     <div className="flex items-center gap-1">
-      <button
-        type="button"
-        onClick={() => editor.chain().focus().toggleUnderline().run()}
-        className={`rounded-md p-2 text-gray-700 hover:bg-gray-200 transition-colors ${
-          activeFormats.underline ? "bg-gray-200" : ""
-        }`}
-        aria-label="Underline"
-        title="Underline"
-      >
-        <UnderlineIcon className="h-4 w-4" />
-      </button>
+      <ActionTooltip title="Underline">
+        <button
+          type="button"
+          onClick={() => editor.chain().focus().toggleUnderline().run()}
+          className={`rounded-md p-2 text-gray-700 hover:bg-gray-200 transition-colors ${
+            activeFormats.underline ? "bg-gray-200" : ""
+          }`}
+          aria-label="Underline"
+        >
+          <UnderlineIcon className="h-4 w-4" />
+        </button>
+      </ActionTooltip>
 
-      <button
-        type="button"
-        onClick={() => editor.chain().focus().toggleStrike().run()}
-        className={`rounded-md p-2 text-gray-700 hover:bg-gray-200 transition-colors ${
-          activeFormats.strike ? "bg-gray-200" : ""
-        }`}
-        aria-label="Strikethrough"
-        title="Strikethrough"
-      >
-        <Strikethrough className="h-4 w-4" />
-      </button>
+      <ActionTooltip title="Strikethrough">
+        <button
+          type="button"
+          onClick={() => editor.chain().focus().toggleStrike().run()}
+          className={`rounded-md p-2 text-gray-700 hover:bg-gray-200 transition-colors ${
+            activeFormats.strike ? "bg-gray-200" : ""
+          }`}
+          aria-label="Strikethrough"
+        >
+          <Strikethrough className="h-4 w-4" />
+        </button>
+      </ActionTooltip>
 
-      <button
-        type="button"
-        onClick={() => editor.chain().focus().toggleSubscript().run()}
-        className={`rounded-md p-2 text-gray-700 hover:bg-gray-200 transition-colors ${
-          activeFormats.subscript ? "bg-gray-200" : ""
-        }`}
-        aria-label="Subscript"
-        title="Subscript"
-      >
-        <SubscriptIcon className="h-4 w-4" />
-      </button>
+      <ActionTooltip title="Subscript">
+        <button
+          type="button"
+          onClick={() => editor.chain().focus().toggleSubscript().run()}
+          className={`rounded-md p-2 text-gray-700 hover:bg-gray-200 transition-colors ${
+            activeFormats.subscript ? "bg-gray-200" : ""
+          }`}
+          aria-label="Subscript"
+        >
+          <SubscriptIcon className="h-4 w-4" />
+        </button>
+      </ActionTooltip>
 
-      <button
-        type="button"
-        onClick={() => editor.chain().focus().toggleSuperscript().run()}
-        className={`rounded-md p-2 text-gray-700 hover:bg-gray-200 transition-colors ${
-          activeFormats.superscript ? "bg-gray-200" : ""
-        }`}
-        aria-label="Superscript"
-        title="Superscript"
-      >
-        <SuperscriptIcon className="h-4 w-4" />
-      </button>
+      <ActionTooltip title="Superscript">
+        <button
+          type="button"
+          onClick={() => editor.chain().focus().toggleSuperscript().run()}
+          className={`rounded-md p-2 text-gray-700 hover:bg-gray-200 transition-colors ${
+            activeFormats.superscript ? "bg-gray-200" : ""
+          }`}
+          aria-label="Superscript"
+        >
+          <SuperscriptIcon className="h-4 w-4" />
+        </button>
+      </ActionTooltip>
     </div>
   );
 }

@@ -3,6 +3,7 @@ import type { Editor } from "@tiptap/react";
 import { List, ListOrdered } from "lucide-react";
 import "@tiptap/extension-bullet-list";
 import "@tiptap/extension-ordered-list";
+import { ActionTooltip } from "./tooltip";
 
 export interface ListButtonsProps {
   editor: Editor | null;
@@ -51,20 +52,20 @@ export function ListButtons({ editor }: ListButtonsProps) {
   return (
     <div className="flex items-center gap-1">
       {buttons.map(({ key, label, icon, action, active }) => (
-        <button
-          key={key}
-          type="button"
-          onClick={action}
-          className={`rounded-md p-2 transition-colors ${
-            active
-              ? "bg-gray-200 text-gray-900"
-              : "text-gray-700 hover:bg-gray-200"
-          }`}
-          aria-label={label}
-          title={label}
-        >
-          {icon}
-        </button>
+        <ActionTooltip key={key} title={label}>
+          <button
+            type="button"
+            onClick={action}
+            className={`rounded-md p-2 transition-colors ${
+              active
+                ? "bg-gray-200 text-gray-900"
+                : "text-gray-700 hover:bg-gray-200"
+            }`}
+            aria-label={label}
+          >
+            {icon}
+          </button>
+        </ActionTooltip>
       ))}
     </div>
   );

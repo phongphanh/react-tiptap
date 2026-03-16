@@ -40,6 +40,9 @@ yarn-error.log*
 # Type cache
 *.tsbuildinfo
 
-.agent
-.agents
+.agent/
+.agents/
 .agentignore
+.vercel/
+
+DOCUMENTS/

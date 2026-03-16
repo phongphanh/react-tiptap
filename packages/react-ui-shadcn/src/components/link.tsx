@@ -2,6 +2,7 @@ import React from "react";
 import type { Editor } from "@tiptap/react";
 import { Link2, Link2Off, ExternalLink, Trash2 } from "lucide-react";
 import * as Popover from "@radix-ui/react-popover";
+import { ActionTooltip } from "./tooltip";
 import "@tiptap/extension-link";
 
 export interface LinkButtonProps {
@@ -63,22 +64,23 @@ export function LinkButton({ editor }: LinkButtonProps) {
 
   return (
     <Popover.Root open={open} onOpenChange={handleOpenChange}>
-      <Popover.Trigger asChild>
-        <button
-          type="button"
-          className={`rounded-md p-2 hover:bg-gray-200 transition-colors ${
-            isLinkActive ? "bg-gray-200 text-blue-600" : "text-gray-700"
-          }`}
-          aria-label={isLinkActive ? "Edit link" : "Insert link"}
-          title={isLinkActive ? "Edit link" : "Insert link"}
-        >
-          {isLinkActive ? (
-            <Link2 className="h-4 w-4" />
-          ) : (
-            <Link2 className="h-4 w-4" />
-          )}
-        </button>
-      </Popover.Trigger>
+      <ActionTooltip title={isLinkActive ? "Edit link" : "Insert link"}>
+        <Popover.Trigger asChild>
+          <button
+            type="button"
+            className={`rounded-md p-2 hover:bg-gray-200 transition-colors ${
+              isLinkActive ? "bg-gray-200 text-blue-600" : "text-gray-700"
+            }`}
+            aria-label={isLinkActive ? "Edit link" : "Insert link"}
+          >
+            {isLinkActive ? (
+              <Link2 className="h-4 w-4" />
+            ) : (
+              <Link2 className="h-4 w-4" />
+            )}
+          </button>
+        </Popover.Trigger>
+      </ActionTooltip>
 
       <Popover.Portal>
         <Popover.Content

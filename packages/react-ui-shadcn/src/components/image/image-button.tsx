@@ -3,6 +3,7 @@ import type { Editor } from "@tiptap/react";
 import { Image as ImageIcon, Upload, Link2 } from "lucide-react";
 import * as Popover from "@radix-ui/react-popover";
 import * as Tabs from "@radix-ui/react-tabs";
+import { ActionTooltip } from "../tooltip";
 
 export interface ImageButtonProps {
   editor: Editor | null;
@@ -62,20 +63,21 @@ export function ImageButton({ editor, onUpload }: ImageButtonProps) {
 
   return (
     <Popover.Root open={open} onOpenChange={setOpen}>
-      <Popover.Trigger asChild>
-        <button
-          type="button"
-          className={`rounded-md p-2 transition-colors ${
-            open
-              ? "bg-gray-200 text-gray-900"
-              : "text-gray-700 hover:bg-gray-200"
-          }`}
-          title="Insert Image"
-          aria-label="Insert Image"
-        >
-          <ImageIcon className="h-4 w-4" />
-        </button>
-      </Popover.Trigger>
+      <ActionTooltip title="Insert Image">
+        <Popover.Trigger asChild>
+          <button
+            type="button"
+            className={`rounded-md p-2 transition-colors ${
+              open
+                ? "bg-gray-200 text-gray-900"
+                : "text-gray-700 hover:bg-gray-200"
+            }`}
+            aria-label="Insert Image"
+          >
+            <ImageIcon className="h-4 w-4" />
+          </button>
+        </Popover.Trigger>
+      </ActionTooltip>
 
       <Popover.Portal>
         <Popover.Content
