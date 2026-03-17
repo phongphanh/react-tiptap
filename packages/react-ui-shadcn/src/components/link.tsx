@@ -1,9 +1,8 @@
 import React from "react";
 import type { Editor } from "@tiptap/react";
-import { Link2, Link2Off, ExternalLink, Trash2 } from "lucide-react";
+import { Link2, Trash2 } from "lucide-react";
 import * as Popover from "@radix-ui/react-popover";
 import { ActionTooltip } from "./tooltip";
-import "@tiptap/extension-link";
 
 export interface LinkButtonProps {
   editor: Editor | null;
@@ -12,14 +11,33 @@ export interface LinkButtonProps {
 export function LinkButton({ editor }: LinkButtonProps) {
   const [open, setOpen] = React.useState(false);
   const [url, setUrl] = React.useState("");
+  const [error, setError] = React.useState("");
   const inputRef = React.useRef<HTMLInputElement>(null);
 
-  const isLinkActive = editor?.isActive("link") ?? false;
+  const [isLinkActive, setIsLinkActive] = React.useState(false);
 
+  React.useEffect(() => {
+    if (!editor) return;
+
+    const update = () => {
+      setIsLinkActive(editor.isActive("link"));
+    };
+
+    editor.on("transaction", update);
+    editor.on("selectionUpdate", update);
+    
+    update();
+
+    return () => {
+      editor.off("transaction", update);
+      editor.off("selectionUpdate", update);
+    };
+  }, [editor]);
   // Pre-fill URL whenever the popover opens
   const handleOpenChange = (nextOpen: boolean) => {
     if (nextOpen && editor) {
       setUrl(editor.getAttributes("link").href ?? "");
+      setError("");
     }
     setOpen(nextOpen);
   };
@@ -36,15 +54,25 @@ export function LinkButton({ editor }: LinkButtonProps) {
     const trimmed = url.trim();
     if (!trimmed) {
       editor.chain().focus().extendMarkRange("link").unsetLink().run();
-    } else {
+      setOpen(false);
+      setError("");
+      return;
+    }
+
+    try {
+      new URL(trimmed);
       editor
         .chain()
         .focus()
         .extendMarkRange("link")
         .setLink({ href: trimmed })
         .run();
+      setOpen(false);
+      setError("");
+    } catch (_) {
+      setError("Please enter a valid URL (e.g., https://example.com)");
+      return;
     }
-    setOpen(false);
   };
 
   const removeLink = () => {
@@ -109,25 +137,21 @@ export function LinkButton({ editor }: LinkButtonProps) {
                 ref={inputRef}
                 type="url"
                 value={url}
-                onChange={(e) => setUrl(e.target.value)}
+                onChange={(e) => {
+                  setUrl(e.target.value);
+                  if (error) setError("");
+                }}
                 onKeyDown={handleKeyDown}
                 placeholder="https://example.com"
-                className="flex-1 rounded-md border border-gray-300 px-3 py-1.5 text-sm outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors"
+                className={`flex-1 rounded-md border px-3 py-1.5 text-sm outline-none transition-colors ${
+                  error
+                    ? "border-red-500 focus:border-red-500 focus:ring-1 focus:ring-red-500"
+                    : "border-gray-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                }`}
               />
-              {/* Open link in new tab */}
-              {url.trim() && (
-                <a
-                  href={url.trim()}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center justify-center rounded-md border border-gray-300 p-1.5 text-gray-500 hover:text-blue-600 hover:border-blue-400 transition-colors"
-                  title="Open in new tab"
-                  onClick={(e) => e.stopPropagation()}
-                >
-                  <ExternalLink className="h-4 w-4" />
-                </a>
-              )}
             </div>
+
+            {error && <p className="text-xs text-red-500">{error}</p>}
 
             {/* Actions */}
             <div className="flex items-center gap-2">

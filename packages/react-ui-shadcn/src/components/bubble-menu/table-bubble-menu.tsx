@@ -71,7 +71,15 @@ export function TableBubbleMenu({ editor }: TableBubbleMenuProps) {
       <BubbleMenu
         editor={editor}
         pluginKey="tableBubbleMenu"
-        shouldShow={({ editor: e }: any) => {
+        shouldShow={({ editor: e, state }: any) => {
+          const isTextSelection = state.selection.type === "text" || state.selection.constructor.name === "TextSelection";
+
+          // If the user is just selecting text inside a table, we don't want to show the table menu.
+          // We want the text menu to show up instead.
+          if (isTextSelection && !state.selection.empty) {
+            return false;
+          }
+
           return (
             e.isActive("table") ||
             e.isActive("tableCell") ||

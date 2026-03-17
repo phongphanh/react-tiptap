@@ -1,6 +1,5 @@
 import React, { useRef, useState, useCallback, useEffect } from "react";
 import { NodeViewWrapper, NodeViewProps } from "@tiptap/react";
-import { Type } from "lucide-react";
 
 export function ImageBlock({
   node,
@@ -15,37 +14,79 @@ export function ImageBlock({
     width || "auto",
   );
 
+  const [resizerState, setResizerState] = useState({ x: 0, w: 0, dir: "" });
+  const [originalSize, setOriginalSize] = useState({ width: 0, height: 0 });
+
+  const onLoad = useCallback(
+    (e: React.SyntheticEvent<HTMLImageElement>) => {
+      setOriginalSize({
+        width: e.currentTarget.naturalWidth,
+        height: e.currentTarget.naturalHeight,
+      });
+
+      if (!width || width === "auto") {
+        const computedWidth = getComputedStyle(e.currentTarget).width;
+        if (computedWidth && computedWidth !== "auto") {
+          setCurrentWidth(computedWidth);
+        }
+      }
+    },
+    [width],
+  );
+
   // --- Resizing Logic ---
   const handleMouseDown = useCallback(
-    (event: React.MouseEvent<HTMLDivElement>) => {
+    (event: React.MouseEvent<HTMLDivElement>, dir: string) => {
       event.preventDefault();
       event.stopPropagation();
       setResizing(true);
 
-      const startX = event.clientX;
       const startWidth = imageRef.current?.offsetWidth || 0;
 
-      const handleMouseMove = (mouseMoveEvent: MouseEvent) => {
-        const currentX = mouseMoveEvent.clientX;
-        const diffX = currentX - startX;
-        // When dragging the right handle, width increases by diffX
-        const newWidth = Math.max(50, startWidth + diffX);
-        setCurrentWidth(newWidth);
-      };
-
-      const handleMouseUp = () => {
-        setResizing(false);
-        // Save the new width in pixels as a string
-        updateAttributes({ width: `${imageRef.current?.offsetWidth}px` });
-        document.removeEventListener("mousemove", handleMouseMove);
-        document.removeEventListener("mouseup", handleMouseUp);
-      };
-
-      document.addEventListener("mousemove", handleMouseMove);
-      document.addEventListener("mouseup", handleMouseUp);
+      setResizerState({
+        x: event.clientX,
+        w: startWidth,
+        dir,
+      });
     },
-    [updateAttributes],
+    [],
   );
+
+  useEffect(() => {
+    if (!resizing) return;
+
+    const handleMouseMove = (mouseMoveEvent: MouseEvent) => {
+      mouseMoveEvent.preventDefault();
+      mouseMoveEvent.stopPropagation();
+
+      const { x, w, dir } = resizerState;
+      // If dragging left side (tl or bl), movement to the left (negative dx) increases width
+      const dx = (mouseMoveEvent.clientX - x) * (/l/.test(dir) ? -1 : 1);
+
+      const newWidth = Math.max(50, w + dx); // min width 50px
+      // A full actual implementation using originalSize for aspectRatio could be used if height isn't automatic,
+      // but since width works independently with `h-auto` we just adjust width here as in the ref.
+
+      setCurrentWidth(newWidth);
+    };
+
+    const handleMouseUp = (mouseUpEvent: MouseEvent) => {
+      mouseUpEvent.preventDefault();
+      mouseUpEvent.stopPropagation();
+      setResizing(false);
+      // Save the new width in pixels as a string
+      if (imageRef.current) {
+        updateAttributes({ width: `${imageRef.current.offsetWidth}px` });
+      }
+    };
+
+    document.addEventListener("mousemove", handleMouseMove, true);
+    document.addEventListener("mouseup", handleMouseUp, true);
+    return () => {
+      document.removeEventListener("mousemove", handleMouseMove, true);
+      document.removeEventListener("mouseup", handleMouseUp, true);
+    };
+  }, [resizing, resizerState, updateAttributes]);
 
   // Sync state if props change externally
   useEffect(() => {
@@ -61,13 +102,13 @@ export function ImageBlock({
   return (
     <NodeViewWrapper
       ref={containerRef}
-      className={`group relative flex flex-col my-4 max-w-full ${alignmentClass}`}
+      className={`group relative my-4 max-w-full ${alignmentClass}`}
       style={{ width: currentWidth }}
       data-drag-handle
     >
       {/* Image Container with Selection Ring */}
-      <div
-        className={`relative flex items-center justify-center transition-all ${
+      <figure
+        className={`relative flex flex-col items-center justify-center transition-all m-0 ${
           selected ? "ring-2 ring-blue-500 ring-offset-2" : ""
         }`}
       >
@@ -76,30 +117,53 @@ export function ImageBlock({
           src={src}
           alt={alt}
           title={title}
-          className="block h-auto w-full object-contain max-w-none rounded-md"
+          onLoad={onLoad}
+          className={`block h-auto w-full object-contain max-w-none mt-0 mb-0 ${
+            resizing ? "pointer-events-none" : ""
+          }`}
           style={{ width: currentWidth }}
         />
 
-        <div
-          className={`absolute -right-1.5 top-1/2 -translate-y-1/2 h-8 w-3 cursor-ew-resize bg-white border border-gray-300 rounded shadow-sm opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center ${
-            selected || resizing ? "opacity-100" : ""
-          }`}
-          onMouseDown={handleMouseDown}
-        >
-          <div className="w-0.5 h-4 bg-gray-400 rounded-full" />
-        </div>
-      </div>
-
-      {/* Optional Caption Input */}
-      {showCaption && (
-        <input
-          type="text"
-          className="mt-2 text-sm text-center text-gray-500 bg-transparent border-none outline-none placeholder:text-gray-300 focus:placeholder:text-gray-400"
-          placeholder="Write a caption..."
-          value={caption || ""}
-          onChange={(e) => updateAttributes({ caption: e.target.value })}
-        />
-      )}
+        {(selected || resizing) && (
+          <>
+            {["tl", "tr", "bl", "br"].map((dir) => (
+              <div
+                key={dir}
+                onMouseDown={(e) => handleMouseDown(e, dir)}
+                className={`absolute w-3 h-3 bg-blue-500 border border-white rounded-full shadow-sm transition-opacity opacity-100
+                  ${dir.includes("t") ? "-top-1.5" : "-bottom-1.5"}
+                  ${dir.includes("l") ? "-left-1.5" : "-right-1.5"}
+                  ${
+                    dir === "tl" || dir === "br"
+                      ? "cursor-nwse-resize"
+                      : "cursor-nesw-resize"
+                  }
+                `}
+              />
+            ))}
+          </>
+        )}
+        {/* Optional Caption Input */}
+        {showCaption && (
+          <figcaption
+            className="mt-0 text-sm text-center text-gray-500 outline-none w-full bg-neutral-100"
+            contentEditable
+            suppressContentEditableWarning
+            onBlur={(e) =>
+              updateAttributes({ caption: e.currentTarget.innerText })
+            }
+            onKeyDown={(e) => {
+              if (e.key === "Enter") {
+                e.preventDefault();
+                e.currentTarget.blur();
+              }
+            }}
+            data-placeholder="Write a caption..."
+          >
+            {caption || ""}
+          </figcaption>
+        )}
+      </figure>
     </NodeViewWrapper>
   );
 }

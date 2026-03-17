@@ -44,10 +44,17 @@ export function TextBubbleMenu({ editor }: TextBubbleMenuProps) {
       shouldShow={({ editor: e, state }: any) => {
         // Only show if there is an actual text selection,
         // and NOT if an image, link, or other blocked node is selected.
-        const { empty } = state.selection;
+        const { empty, $anchor, $head } = state.selection;
         const isImage = e.isActive("image");
         const isLink = e.isActive("link");
-        return !empty && !isImage && !isLink;
+        
+        // Ensure it's an actual text selection, not a node or cell selection
+        // CellSelections and NodeSelections generally don't have $anchor and $head 
+        // in the exact same way, but the most reliable way in Tiptap is checking 
+        // if it's a TextSelection.
+        const isTextSelection = state.selection.type === "text" || state.selection.constructor.name === "TextSelection";
+
+        return !empty && !isImage && !isLink && isTextSelection;
       }}
       className="flex items-center space-x-1 border border-gray-200 bg-white shadow-md rounded-md p-1"
     >

@@ -44,5 +44,5 @@ yarn-error.log*
 .agents/
 .agentignore
 .vercel/
-
+.claude/
 DOCUMENTS/

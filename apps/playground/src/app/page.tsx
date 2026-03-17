@@ -37,6 +37,7 @@ import { ReactNodeViewRenderer } from "@tiptap/react";
 
 export default function Home() {
   const [selectedFont, setSelectedFont] = React.useState(DEFAULT_FONT_FAMILY);
+  const [htmlContent, setHtmlContent] = React.useState("");
 
   // Mock upload handler for the playground
   const handleUpload = async (file: File): Promise<string> => {
@@ -88,12 +89,13 @@ export default function Home() {
     editorProps: {
       attributes: {
         class:
-          "prose prose-sm sm:prose mx-auto focus:outline-none min-h-[300px]",
+          "prose prose-sm focus:outline-none min-h-[300px] max-w-full",
       },
     },
-    onTransaction: ({ editor: e }) => {
+    onUpdate: ({ editor }) => {
+      setHtmlContent(editor.getHTML());
       const matched = FONT_FAMILIES.find((f) =>
-        e.isActive("textStyle", { fontFamily: f.value }),
+        editor.isActive("textStyle", { fontFamily: f.value }),
       );
       setSelectedFont(matched ? matched.value : DEFAULT_FONT_FAMILY);
     },
@@ -103,13 +105,12 @@ export default function Home() {
   const allFontLinks = FONT_FAMILIES.map((f) =>
     getGoogleFontUrl(f.value),
   ).filter(Boolean);
-  const rawHtml = editor ? editor.getHTML() : "";
   // Wrap with ALL font @imports so the exported HTML is fully self-contained
   const allFontImports = FONT_FAMILIES.map(
     (f) => `@import url('${getGoogleFontUrl(f.value)}');`,
   ).join("\n");
-  const wrappedHtml = rawHtml
-    ? `<style>\n${allFontImports}\n</style>\n${rawHtml}`
+  const wrappedHtml = htmlContent
+    ? `<style>\n${allFontImports}\n</style>\n${htmlContent}`
     : "";
 
   return (
